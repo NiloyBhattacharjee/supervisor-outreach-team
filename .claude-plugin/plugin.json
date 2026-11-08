@@ -1,0 +1,8 @@
+{
+  "name": "supervisor-outreach-team",
+  "version": "0.1.0",
+  "description": "Finds possible research supervisors, studies their work, checks fit, and drafts a personal email to each. Never sends anything.",
+  "author": { "name": "Niloy Bhattacharjee" },
+  "license": "MIT",
+  "repository": "https://github.com/NiloyBhattacharjee/supervisor-outreach-team"
+}
