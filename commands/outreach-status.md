@@ -6,7 +6,7 @@ allowed-tools: Read, Edit, Write, Grep, Glob
 
 Input: $ARGUMENTS
 
-Tracker: `${CLAUDE_PLUGIN_ROOT}/data/tracker.csv`. Drafts: `${CLAUDE_PLUGIN_ROOT}/data/drafts/`.
+Data lives in `outreach-data/` inside the current working directory, not in the plugin folder. Tracker: `outreach-data/tracker.csv`. Drafts: `outreach-data/drafts/`. If there is no tracker, say to run `/outreach` from the folder that holds `outreach-data/`, and stop.
 
 ## If the input starts with `mark`
 
@@ -25,7 +25,7 @@ Show the count per status, then a table: name, university, status, fit score, ve
 List anyone with status `sent`, no `followup_date`, and a `sent_date` more than 7 days ago. Show how many days it has been. Rows at 7 to 10 days are due now, and rows past 10 are overdue.
 
 If anyone is listed, offer to write follow-ups. Do not write them until I say yes. When I do, for each person:
-- Read their draft file and every `## Follow-up` section in `data/drafts/` so no wording repeats.
+- Read their draft file and every `## Follow-up` section in `outreach-data/drafts/` so no wording repeats.
 - Write two plain lines for the same thread. Mention one specific thing from the original email. Ask once, without pressure and without apology.
 - Same language rules as the emails: no em dashes, no flattery, no stock phrases such as "just following up" or "circling back".
 - Append it to their draft file under `## Follow-up`, and set `followup_date` only when I tell you it was sent.

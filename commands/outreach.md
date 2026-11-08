@@ -7,15 +7,23 @@ allowed-tools: Agent, Read, Write, Edit, Glob, Grep, WebSearch, WebFetch
 Input: $ARGUMENTS
 
 You run a team of four agents. Paths:
-- DATA = `${CLAUDE_PLUGIN_ROOT}/data`
+- DATA = the absolute path of `outreach-data` inside the current working directory. This holds the applicant's own data. Never use the plugin folder for it: Claude Code blocks writes there, and plugin updates replace it.
+- TEMPLATES = `${CLAUDE_PLUGIN_ROOT}/templates`
 - CHECKER = `${CLAUDE_PLUGIN_ROOT}/scripts/check_draft.py`
 
 Work moves between agents through files in DATA, not chat. Give each agent only: the DATA path (and CHECKER for the task handler), plus the options below. Do not paste profiles, reviews or drafts into prompts.
 
 The team never sends email. Drafts only. If the input is empty, ask for a university or country and stop.
 
-If `DATA/me.md` is missing, tell me to copy `DATA/me.example.md` to `DATA/me.md` and fill it in, then stop. If `DATA/tracker.csv` is missing, create it containing only this header line:
-`slug,name,title,university,department,country,email,faculty_page,lab_page,scholar_or_dblp,recruiting,source,status,fit_score,verdict,draft_file,sent_date,followup_date,notes`
+## First-run setup
+
+Create anything missing in DATA:
+- `DATA/tracker.csv`: create it containing only this header line:
+  `slug,name,title,university,department,country,email,faculty_page,lab_page,scholar_or_dblp,recruiting,source,status,fit_score,verdict,draft_file,sent_date,followup_date,notes`
+- `DATA/style-guide.md`: copy it from `TEMPLATES/style-guide.md`.
+- `DATA/me.md`: copy `TEMPLATES/me.example.md` there, tell me to fill it in, and stop.
+
+## Options
 
 Read these options from the input:
 - place: one university, a country, or a list of universities
@@ -27,7 +35,7 @@ Read these options from the input:
 
 ## Step 0: style guide
 
-Run this only if `DATA/style-guide.md` does not exist, or the input says `refresh style`.
+Run this only if the input says `refresh style`. Otherwise use the copy that setup put in DATA.
 
 Search the web for advice on emailing prospective supervisors. Use university and faculty pages first (graduate school "contacting a supervisor" pages, professors' own "read this before emailing me" pages), not blogs selling services. Read 6 to 10 of them. Write `DATA/style-guide.md` with:
 - the points most sources agree on

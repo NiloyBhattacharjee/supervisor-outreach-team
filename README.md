@@ -18,11 +18,11 @@ A [Claude Code](https://claude.com/claude-code) plugin for anyone applying to a 
 
 ## Why it exists
 
-Cold emailing supervisors goes badly in two common ways. One is the mass email that names no paper. The other is the over-polished AI email that professors now spot at a glance. Graduate schools and faculty pages say the same things again and again: read their work, be specific, keep it short, write to one person ([sources](data/style-guide.md#sources)). This plugin does the reading and checking, and leaves the final judgement to you.
+Cold emailing supervisors goes badly in two common ways. One is the mass email that names no paper. The other is the over-polished AI email that professors now spot at a glance. Graduate schools and faculty pages say the same things again and again: read their work, be specific, keep it short, write to one person ([sources](templates/style-guide.md#sources)). This plugin does the reading and checking, and leaves the final judgement to you.
 
 | What it does | How it does it |
 |---|---|
-| **Never sends email** | Only writes drafts to `data/drafts/`. None of the agents has a mail tool. |
+| **Never sends email** | Only writes drafts to `outreach-data/drafts/`. None of the agents has a mail tool. |
 | **Sources every fact** | Each claim about a professor in a profile links to the page or paper it came from. |
 | **Says no when the fit is weak** | The reviewer is told not to stretch your experience. Weak fits are marked `skip`. |
 | **Writes no two emails alike** | No template. A checker script rejects reused sentences, same-shaped openings and closings, and any opening style, part order or closing style used in the last 10 drafts. |
@@ -33,9 +33,9 @@ Cold emailing supervisors goes badly in two common ways. One is the mass email t
 
 ```mermaid
 flowchart LR
-    U(["/outreach &lt;place&gt; [field]"]) --> S0{style-guide.md<br/>exists?}
-    S0 -- no --> SG[Step 0<br/>read 6 to 10 university<br/>and faculty pages] --> A
-    S0 -- yes --> A
+    U(["/outreach &lt;place&gt; [field]"]) --> S0{refresh style?}
+    S0 -- yes --> SG[Step 0<br/>read 6 to 10 university<br/>and faculty pages] --> A
+    S0 -- no --> A
 
     A["Administrator<br/>finds faculty"] -->|tracker.csv<br/>status: found| R["Researcher<br/>reads 3 to 5 papers"]
     R -->|profiles/slug.md| V["Reviewer<br/>fit score 1 to 5"]
@@ -51,7 +51,7 @@ flowchart LR
     class U,Y you
 ```
 
-The agents pass work to each other through files in `data/`, not through chat, so each step can be read, corrected and re-run on its own. Every stage works on all rows in its input status, so a run that stopped half-way finishes on the next `/outreach`.
+The agents pass work to each other through files in `outreach-data/`, not through chat, so each step can be read, corrected and re-run on its own. Every stage works on all rows in its input status, so a run that stopped half-way finishes on the next `/outreach`.
 
 ### Life of a tracker row
 
@@ -78,9 +78,8 @@ You need [Claude Code](https://claude.com/claude-code) and Python 3.
 
 ```bash
 git clone https://github.com/NiloyBhattacharjee/supervisor-outreach-team.git
-cd supervisor-outreach-team
-cp data/me.example.md data/me.md     # then fill it in honestly
-claude --plugin-dir .
+mkdir my-applications && cd my-applications          # your working folder
+claude --plugin-dir ../supervisor-outreach-team
 ```
 
 Then, inside Claude Code:
@@ -89,7 +88,7 @@ Then, inside Claude Code:
 /supervisor-outreach-team:outreach University of Waterloo software engineering
 ```
 
-`data/me.md` is the only source of facts about you. The agents never add to it, so anything not in it never appears in an email. Mark unbuilt projects as `(planned)`, and they won't be written up as if they exist.
+The first run creates `outreach-data/` in your working folder and copies a blank `me.md` template there. Fill it in honestly and run again. `outreach-data/me.md` is the only source of facts about you. The agents never add to it, so anything not in it never appears in an email. Mark unbuilt projects as `(planned)`, and they won't be written up as if they exist.
 
 ## Commands
 
@@ -104,7 +103,7 @@ Plugin commands are namespaced. If the short name doesn't autocomplete, use the 
 ## What you get per professor
 
 ```text
-data/
+outreach-data/                 created in the folder you run Claude from
 ├── tracker.csv              one row per professor: status, fit, links, notes
 ├── profiles/smith-uni.md      field, 3 to 5 papers with what each actually did, limits on fit
 ├── reviews/smith-uni.md       fit score, best paper, real links to your work, gaps, verdict
@@ -114,7 +113,7 @@ data/
 Every draft is checked before it is saved. The task handler rewrites it until the checker passes, up to four times:
 
 ```text
-$ python scripts/check_draft.py data/drafts/example-uni.md
+$ python scripts/check_draft.py outreach-data/drafts/example-uni.md
 words=141 paragraphs=3 closest=0.24 vs other-uni.md
 FAIL: opening has the same shape as other-uni.md: 'Your study of flaky CI builds found ...'
 FAIL: banned wording: resonat
@@ -134,13 +133,13 @@ agents/researcher.md           reads papers through DBLP, Semantic Scholar and a
 agents/reviewer.md             honest fit score, gaps, research idea, verdict
 agents/task-handler.md         writes and checks the email
 scripts/check_draft.py         word count, banned words, similarity to earlier drafts
-data/style-guide.md            emailing advice from 10 university and faculty pages, with links
-data/me.example.md             template for your profile
+templates/style-guide.md       emailing advice from 10 university and faculty pages, with links
+templates/me.example.md        template for your profile
 ```
 
 ## Privacy
 
-Your profile, tracker, profiles, reviews and drafts are in `.gitignore` and stay on your machine. Only the template and the sourced style guide are committed.
+Your profile, tracker, profiles, reviews and drafts live in `outreach-data/`, in your own working folder and outside the plugin. Claude Code blocks writes inside a loaded plugin's folder, and plugin updates would replace it anyway. The plugin ships only the templates and the sourced style guide, and `outreach-data/` is git-ignored in case you run from inside the repo.
 
 ## Limits
 
